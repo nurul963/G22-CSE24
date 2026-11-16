@@ -2,6 +2,7 @@ import express from 'express';
 import { PORT } from './utils/env.js';
 import { connectDB } from './config/db.js';
 import userRoute from './routes/userRoutes.js';
+import adminRoute from './routes/adminRoute.js';
 import cors from 'cors';
 const app=express();
 app.use(express.json());
@@ -16,6 +17,7 @@ app.get("/",(req,resp)=>{
     })
 })
 app.use("/api/auth",userRoute)
+app.use("/api/admin",adminRoute)
 app.listen(PORT,()=>{
     console.log('server is running on port 8080');
     connectDB();
