@@ -2,6 +2,23 @@ import { User } from "../models/user.model.js";
 import bcrypt from 'bcryptjs'
 import { generateAccessToken, generateRefreshToken, getRefreshExpiry, hashToken } from "../utils/tokens.js";
 import RefreshSession from '../models/RefreshSession.js';
+const COOKIE_NAME = "refreshToken";
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  path: "/api/auth"
+};
+const setRefreshCookie = (res, token) => {
+  res.cookie(COOKIE_NAME, token, {
+    ...cookieOptions,
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+};
+const clearRefreshCookie = (res) => {
+  res.clearCookie(COOKIE_NAME, cookieOptions);
+};
+
 export const register=async(req,resp)=>{
     try {
         const {name,email,password,role}=req.body;
@@ -35,20 +52,21 @@ export const register=async(req,resp)=>{
 export const login=async(req,resp)=>{
     try {
         const {email,password}=req.body;
-        if(!email.trim() || !password){
+        if(!email.trim()|| !password){
             return resp.status(400).json({
-                message:"feild cannot be empty",
+                message:"Feild cannot be empty",
                 success:false
             })
         }
-        const user=await User.findOne({email}).select("+password");
+        const user=await User.
+                            findOne({email:email.trim()})
+                            .select("+password");
         if(!user){
-            return resp.status(400).json({
+            return resp.status(404).json({
                 message:"User not registered",
                 success:false
             })
         }
-        //compare password 
         const isMatched=await bcrypt.compare(password,user.password);
         if(!isMatched){
             return resp.status(400).json({
@@ -63,18 +81,20 @@ export const login=async(req,resp)=>{
             tokenHash:hashToken(refreshToken),
             expiresAt:getRefreshExpiry(refreshToken)
         })
+        setRefreshCookie(resp,refreshToken);
         return resp.status(200).json({
-            message:"Login success",
+            message:"Login Success",
             success:true,
             id:user._id,
             name:user.name,
             email:user.email,
             accessToken
         })
+
     } catch (error) {
-        return resp.status(500).json({
-            message:error.message,
-            success:false
-        })
+      return resp.status(500).json({
+        message:error.message,
+        success:false
+      })  
     }
 }

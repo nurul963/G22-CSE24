@@ -1,21 +1,21 @@
-import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken'
 import { ACCESS_TOKEN_SECRET } from '../utils/env.js';
-export const isAuthenticated = (req, resp, next) => {
-    const token = req.headers?.token?.split(" ")[1] || req.cookies?.token?.split(" ")[1] || null;
+export const isAuthenticated=async(req,resp,next)=>{
+    const token=req.headers?.authorization?.split(" ")[1]||null;
+    if(!token){
+        return resp.status(401).json({
+            message:"Authentication is missing",
+            success:false
+        })
+    }
     try {
-        if (!token) {
-            resp.status(401).json({
-                message: "Un Authorized",
-                success: false
-            })
-        }
-        const decode = jwt.verify(token, ACCESS_TOKEN_SECRET);
-        req.user = decode;
+        const decode=jwt.verify(token,ACCESS_TOKEN_SECRET);
+        req.user=decode;
         next();
     } catch (error) {
         return resp.status(500).json({
-            message: error.message,
-            success: false
+            message:error.message,
+            success:false
         })
     }
 }
