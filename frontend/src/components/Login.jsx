@@ -1,13 +1,27 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { login } from '../services/auth.service';
+import { setAccessToken } from '../api/token';
 
 const Login = () => {
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
-    const handleOnSubmit=(e)=>{
+    const navigate=useNavigate();
+    const handleOnSubmit=async(e)=>{
         e.preventDefault();
-        // api call for login
-        console.log({email,password});
+        try {
+            const response=await login({email,password});
+            if(response.status===200){
+                alert(response.data.message);
+                setAccessToken(response.data.accessToken);
+                navigate("/user-dashboard");
+            }else{
+                alert(response.data.message);
+            }
+            console.log(response);
+        } catch (error) {
+           alert(error.message); 
+        }
     }
   return (
     <div className="container">
@@ -32,7 +46,7 @@ const Login = () => {
                             </div>
                             <div className="form-group mb-3">
                                 <label className='form-label text-white'>Password</label>
-                                <input type="text"
+                                <input type="password"
                                 value={password}
                                 onChange={(e)=>setPassword(e.target.value)}
                                  required className='form-control ' />

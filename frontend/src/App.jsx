@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar"
 import PageNotFound from "./components/PageNotFound"
 import Register from "./components/Register"
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
+import UserDashboard from "./components/UserDashboard"
 
 function App() {
   
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<Home/>}/>
         <Route path="/register" element={<Register/>}/>
         <Route path="/login" element={<Login/>}/>
+        <Route path="/user-dashboard" element={<UserDashboard/>}/>
         <Route path="*" element={<PageNotFound/>}/>
       </Routes>
       </BrowserRouter>
